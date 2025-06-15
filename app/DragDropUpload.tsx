@@ -13,9 +13,10 @@ interface FileWithPreview extends File {
 }
 
 export default function DragDropUpload() {
-  const [files, setFiles] = useState<FileWithPreview[]>([])
-  const [isDragOver, setIsDragOver] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [files, setFiles] = useState<FileWithPreview[]>([]);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [prompt, setPrompt] = useState<string>("")
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
@@ -78,10 +79,18 @@ export default function DragDropUpload() {
     fileInputRef.current?.click()
   }
 
+  const onSubmit = () => {
+    console.log('Prompt:', prompt);
+    console.log('Files', files)
+  }
+
   return (
-    <>
-      <Textarea className="max-w-2xl mb-5" />
-      <div className="w-full max-w-2xl mx-auto p-6 space-y-4 border-2 mb-4">
+    <div className="w-full max-w-2xl mx-auto flex flex-col gap-5 items-center">
+      <Textarea className="max-w-2xl"
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+      />
+      <div className="w-full p-6 space-y-4 border-2">
         <div className="text-center space-y-2">
           <h2 className="text-2xl text- font-bold">File Upload</h2>
           <p className="text-muted-foreground">Drag and drop files here or click to browse</p>
@@ -189,7 +198,7 @@ export default function DragDropUpload() {
           </div>
         )}
       </div>
-      <Button className="w-[40%]">Submit</Button>
-    </>
+      <Button className="w-[80%]" onClick={onSubmit}>Submit</Button>
+    </div>
   )
 }

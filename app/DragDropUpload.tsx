@@ -86,19 +86,19 @@ export default function DragDropUpload() {
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col gap-5 items-center">
-      <Textarea className="max-w-2xl"
+      <Textarea className="bg-[#303030] text-white max-w-2xl min-h-[50px] max-h-[150px] border-white"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
       />
-      <div className="w-full p-6 space-y-4 border-2">
+      <div className="w-full p-6 space-y-4 border border-white">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl text- font-bold">File Upload</h2>
-          <p className="text-muted-foreground">Drag and drop files here or click to browse</p>
+          <h2 className="text-2xl text-white font-bold">File Upload</h2>
+          <p className="text-white">Drag and drop files here or click to browse</p>
         </div>
 
         <Card
           className={cn(
-            "border-2 border-dashed transition-colors cursor-pointer",
+            "border border-dashed bg-[#303030] transition-colors cursor-pointer",
             isDragOver ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50",
           )}
           onDragOver={handleDragOver}
@@ -111,7 +111,7 @@ export default function DragDropUpload() {
               className={cn("h-12 w-12 mb-4 transition-colors", isDragOver ? "text-primary" : "text-muted-foreground")}
             />
             <div className="space-y-2">
-              <p className="text-lg font-medium">{isDragOver ? "Drop files here" : "Choose files or drag and drop"}</p>
+              <p className="text-lg text-white font-medium">{isDragOver ? "Drop files here" : "Choose files or drag and drop"}</p>
               <p className="text-sm text-muted-foreground">Support for single or bulk uploads</p>
             </div>
             <Button variant="outline" className="mt-4" type="button">
@@ -130,10 +130,10 @@ export default function DragDropUpload() {
         />
 
         {files.length > 0 && (
-          <Card>
+          <Card className="bg-[#303030]">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-medium">Uploaded Files ({files.length})</h3>
+                <h3 className="font-medium  text-white">Uploaded Files ({files.length})</h3>
                 <Button
                   variant="outline"
                   size="sm"
@@ -159,10 +159,10 @@ export default function DragDropUpload() {
                         className="h-10 w-10 object-cover rounded"
                       />
                     ) : (
-                      <File className="h-10 w-10 text-muted-foreground" />
+                      <File className="h-10 w-10" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{file.name}</p>
+                      <p className="text-white font-medium truncate">{file.name}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
                           {file.type || "Unknown"}
@@ -191,14 +191,14 @@ export default function DragDropUpload() {
 
         {files.length > 0 && (
           <div className="flex gap-2">
-            <Button className="flex-1">
+            <Button className="bg-white hover:bg-zinc-200 text-black flex-1 duration-200 cursor-pointer">
               Upload {files.length} {files.length === 1 ? "File" : "Files"}
             </Button>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" className="bg-white hover:bg-zinc-200 text-black duration-200 cursor-pointer">Cancel</Button>
           </div>
         )}
       </div>
-      <Button className="w-[80%]" onClick={onSubmit}>Submit</Button>
+      <Button className="w-[80%] bg-white text-black hover:bg-zinc-200 duration-200 cursor-pointer" onClick={onSubmit}>Submit</Button>
     </div>
   )
 }

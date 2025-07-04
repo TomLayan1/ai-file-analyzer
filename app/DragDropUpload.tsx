@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { getAiResult } from "@/server/ai";
 
 interface FileWithPreview extends File {
   preview?: string
@@ -79,10 +80,32 @@ export default function DragDropUpload() {
     fileInputRef.current?.click()
   }
 
-  const onSubmit = () => {
-    console.log('Prompt:', prompt);
-    console.log('Files', files)
+  const onSubmit = async () => {
+    if (files.length === 0) return;
+
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    formData.append("prompt", prompt);
+
+    // console.log("Prompt:", prompt);
+    // console.log("File name:", files[0].name);
+    // console.log("File type:", files[0].type);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Upload failed:", errorText);
+      return;
+    }
+
+    const data = await res.json();
+    console.log("AI Result:", data?.result?.steps?.[0].text);
   }
+  
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col gap-5 items-center">
@@ -202,3 +225,144 @@ export default function DragDropUpload() {
     </div>
   )
 }
+
+
+// "use client";
+
+// import { useRef, useState, type DragEvent, type ChangeEvent } from "react";
+// import { Upload, File as FileIcon, X } from "lucide-react";
+// import { getAiResult } from "@/server/ai";
+// import { Button } from "@/components/ui/button";
+// import { Badge } from "@/components/ui/badge";
+// import { Card, CardContent } from "@/components/ui/card";
+// import { Textarea } from "@/components/ui/textarea";
+
+// export default function DragDropUpload() {
+//   const fileInputRef = useRef<HTMLInputElement>(null);
+//   const [files, setFiles] = useState<File[]>([]);
+//   const [prompt, setPrompt] = useState("");
+//   const [response, setResponse] = useState("");
+//   const [isDragOver, setIsDragOver] = useState(false);
+//   const [loading, setLoading] = useState(false);
+
+//   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+//     e.preventDefault();
+//     setIsDragOver(true);
+//   };
+
+//   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+//     e.preventDefault();
+//     setIsDragOver(false);
+//   };
+
+//   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+//     e.preventDefault();
+//     setIsDragOver(false);
+//     const dropped = Array.from(e.dataTransfer.files);
+//     setFiles(dropped);
+//   };
+
+//   const handleFileInput = (e: ChangeEvent<HTMLInputElement>) => {
+//     if (e.target.files) {
+//       setFiles(Array.from(e.target.files));
+//     }
+//   };
+
+//   const convertFileToBase64 = (file: File): Promise<string> => {
+//     return new Promise((resolve, reject) => {
+//       const reader = new FileReader();
+//       reader.onloadend = () => resolve(reader.result as string);
+//       reader.onerror = reject;
+//       reader.readAsDataURL(file);
+//     });
+//   };
+
+//   const onSubmit = async () => {
+//     if (files.length === 0 || !prompt.trim()) return;
+
+//     const file = files[0];
+//     setLoading(true);
+
+//     try {
+//       const base64WithPrefix = await convertFileToBase64(file);
+//       const base64 = base64WithPrefix.split(",")[1]; // strip prefix
+//       const mimeType = file.type;
+
+//       const formData = new FormData();
+//       formData.append("prompt", prompt);
+//       formData.append("base64", base64);
+//       formData.append("mimeType", mimeType);
+
+//       const result = await getAiResult(formData);
+//       setResponse(result);
+//     } catch (error) {
+//       console.error("Upload error:", error);
+//       setResponse("❌ Something went wrong. Check console for details.");
+//     } finally {
+//       setLoading(false);
+//     }
+
+//   };
+
+//   return (
+//     <div className="max-w-2xl mx-auto flex flex-col gap-4">
+//       <Textarea
+//         className="bg-zinc-900 text-white"
+//         placeholder="Enter your prompt here"
+//         value={prompt}
+//         onChange={(e) => setPrompt(e.target.value)}
+//       />
+
+//       <div
+//         className={`border-2 border-dashed p-6 text-center bg-zinc-800 text-white transition cursor-pointer ${isDragOver ? "bg-zinc-700 border-white" : ""
+//           }`}
+//         onDragOver={handleDragOver}
+//         onDragLeave={handleDragLeave}
+//         onDrop={handleDrop}
+//         onClick={() => fileInputRef.current?.click()}
+//       >
+//         <Upload className="mx-auto mb-2" />
+//         <p>{isDragOver ? "Drop the file here" : "Drag and drop or click to upload"}</p>
+//       </div>
+
+//       <input
+//         ref={fileInputRef}
+//         type="file"
+//         onChange={handleFileInput}
+//         className="hidden"
+//       />
+
+//       {files.length > 0 && (
+//         <Card>
+//           <CardContent className="flex items-center justify-between p-4">
+//             <div>
+//               <p className="text-white">{files[0].name}</p>
+//               <Badge>{files[0].type || "unknown"}</Badge>
+//             </div>
+//             <Button
+//               size="sm"
+//               variant="outline"
+//               onClick={() => setFiles([])}
+//               className="text-red-500 border-red-500"
+//             >
+//               <X className="w-4 h-4" />
+//             </Button>
+//           </CardContent>
+//         </Card>
+//       )}
+
+//       <Button onClick={onSubmit} disabled={loading} className="bg-white text-black hover:bg-gray-200">
+//         {loading ? "Generating..." : "Submit"}
+//       </Button>
+
+//       {response && (
+//         <Card className="bg-zinc-900 text-white p-4 whitespace-pre-wrap">
+//           <CardContent>
+//             <h2 className="text-lg font-semibold mb-2">AI Response:</h2>
+//             <p>{response}</p>
+//           </CardContent>
+//         </Card>
+//       )}
+//     </div>
+//   );
+// }
